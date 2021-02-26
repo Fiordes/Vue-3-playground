@@ -1,26 +1,57 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <AppHeader />
+  <div class="w-full flex">
+    <router-view></router-view>
+  </div>
+
+  <teleport to="body">
+    <LoginModal />
+  </teleport>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AppHeader from "@/components/AppHeader.vue";
+import LoginModal from "./components/LoginModal.vue";
+import firebase from "./utilities/fire-base";
+import { mapActions } from "vuex";
 
 export default {
-  name: 'App',
+  data() {
+    return {
+      // isLoginOpen: false,
+      // isLoggedIn: false,
+      // authUser: {},
+    };
+  },
   components: {
-    HelloWorld
-  }
-}
+    AppHeader,
+    LoginModal,
+  },
+  mounted() {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.changeStatus(true);
+        this.changeUserInfo(user);
+      } else {
+        this.changeStatus(false);
+        this.changeUserInfo({});
+      }
+    });
+  },
+  methods: {
+    ...mapActions(["changeUserInfo", "changeStatus", "changeModalState"]),
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 1s;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 </style>
